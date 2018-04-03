@@ -1,0 +1,20 @@
+language: elixir
+env:
+  - MIX_ENV=test
+script:
+  - mix local.hex --force
+  - mix local.rebar --force
+  - mix deps.get
+  - mix compile
+  - mix dialyzer --halt-exit-status
+  - mix coveralls.travis
+install: true
+elixir:
+  - 1.6.4
+  - 1.5.3
+sudo: required
+before_install:
+  - sudo apt-get install -qq pkg-config fuse libfuse-dev erlang-dev
+  - sudo modprobe fuse
+  - sudo chmod 666 /dev/fuse
+  - sudo chown root:$USER /etc/fuse.conf
