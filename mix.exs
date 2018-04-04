@@ -5,7 +5,7 @@ defmodule Userfs.MixProject do
   def project do
     [
       app: :userfs,
-      version: "0.9.0",
+      version: "1.0.1",
       elixir: "~> 1.5",
       start_permanent: Mix.env() == :prod,
       package: package(),
