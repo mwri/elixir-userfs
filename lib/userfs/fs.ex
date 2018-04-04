@@ -1,6 +1,6 @@
 defmodule Userfs.Fs do
 
-  @doc """
+  @moduledoc """
   To implement a filesystem a callback module must be created which implements
   five methods.
 
@@ -17,7 +17,7 @@ defmodule Userfs.Fs do
   First `userfs_readdir/2` determines the contents of a directory. It is called
   with two arguments, the FS state (as returned by `init`) and the path of the
   directory to be read. The response should either be `{:error, @error_noent}`
-  state}` if the directory to be read does not exist, or `{:ok, ents, state}`
+  if the directory to be read does not exist, or `{:ok, ents, state}`
   where `ents` is a list of filenames.
 
   For example, in the `Userfs.Fs.Hello` hello world filesystem, the
@@ -43,14 +43,14 @@ defmodule Userfs.Fs do
   of bytes of data if it is a file, or the length of the destination filename
   if it is a symbolic link.
 
-  The `Userfs.Fs.Hello` filesystem implements the `userfs_getattr/2 callback
+  The `Userfs.Fs.Hello` filesystem implements the `userfs_getattr/2` callback
   like this:
 
       def userfs_getattr(state, "/") do
         {:ok, {0o0755, @attr_dir, 0}, state}
       end
       def userfs_getattr(state, "/hello") do
-        {:ok, {0o0644, @attr_file, byte_size("Hello world!\n")}, state}
+        {:ok, {0o0644, @attr_file, byte_size("Hello world!\\n")}, state}
       end
       def userfs_getattr(state, "/world") do
         {:ok, {0o0755, @attr_symlink, byte_size("hello")}, state}
@@ -77,7 +77,7 @@ defmodule Userfs.Fs do
   the `Userfs.Fs.Hello` hello world filesystem:
 
       def userfs_read(state, "/hello") do
-        {:ok, "Hello world!\n", state}
+        {:ok, "Hello world!\\n", state}
       end
       def userfs_read(state, _) do
         {:error, @error_noent, state}

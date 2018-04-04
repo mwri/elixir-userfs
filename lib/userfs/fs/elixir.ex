@@ -173,6 +173,7 @@ defmodule Userfs.Fs.Elixir do
     {:error, @error_noent, state}
   end
 
+  @doc false
   def elixirfs_readdir(state, :root) do
     {:ok, ["pids", "names", "nodes", "apps", "code"], state}
   end
@@ -234,6 +235,7 @@ defmodule Userfs.Fs.Elixir do
     {:ok, ["file"], state}
   end
 
+  @doc false
   def elixirfs_getattr(state, :root) do
     {:ok, {0o0755, @attr_dir, 0}, state}
   end
@@ -308,6 +310,7 @@ defmodule Userfs.Fs.Elixir do
     {:ok, {0o0644, @attr_file, file_size(state, {:code, :module, module, :file})}, state}
   end
 
+  @doc false
   def elixirfs_readlink(state, {:local_name, name}) do
     pid = Process.whereis(name)
     dest = state.mount_point <> "/pids/#PID" <> :erlang.list_to_binary(:erlang.pid_to_list(pid))
@@ -329,6 +332,7 @@ defmodule Userfs.Fs.Elixir do
     {:ok, dest, state}
   end
 
+  @doc false
   def elixirfs_read(state, {:proc_info, pid, item_spec}) do
     {^item_spec, item_data} = Process.info(pid, item_spec)
     content = inspect(item_data, pretty: true) <> "\n"

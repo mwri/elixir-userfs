@@ -3,6 +3,9 @@ all: compile
 deps:
 	mix deps.get
 
+docs:
+	mix docs
+
 compile: deps
 	mix compile
 

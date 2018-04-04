@@ -11,7 +11,7 @@ defmodule Userfs.Server do
   defstruct mount_point: nil, fs_mod: nil, fs_state: nil, phase: :init, port: nil, port_os_pid: nil
 
   @doc """
-  Callled by the `Userfs.MountSup` supervisor, `start_link` starts an FS
+  Called by the `Userfs.MountSup` supervisor, `start_link` starts an FS
   as a `GenServer`. The three arguments are the same as for `Userfs.mount/3`.
   """
 
@@ -48,6 +48,7 @@ defmodule Userfs.Server do
     status
   end
 
+  @doc false
   def init([mount_point, fs_mod, fs_opts]) do
     {:ok, port_path} = Userfs.App.find_port!()
     port = Port.open(
@@ -77,14 +78,14 @@ defmodule Userfs.Server do
     :undefined
   end
 
-  def port_tx(data, %__MODULE__{port: port} = state) do
+  defp port_tx(data, %__MODULE__{port: port} = state) do
     true = Port.command(port, <<@magiccookie::size(32), data::binary>>)
     state
   end
 
   @spec handle_fusereq(%__MODULE__{}, integer, atom, list, fun) :: %__MODULE__{}
 
-  def handle_fusereq(
+  defp handle_fusereq(
     %__MODULE__{fs_mod: fs_mod, fs_state: fs_state} = state,
     req_code,
     cb_fun,
@@ -250,7 +251,7 @@ defmodule Userfs.Server do
     %{state | phase: :stopping}
   end
 
-  def log_error(msg) do
+  defp log_error(msg) do
     :ok = :error_logger.error_msg(String.to_charlist(msg))
   end
 

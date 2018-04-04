@@ -86,7 +86,7 @@ defmodule Userfs.Fs.Example do
     {:error, @error_noent, state}
   end
 
-  def file_size(state, path) do
+  defp file_size(state, path) do
     {:ok, content, _state} = userfs_read(state, path)
     byte_size(content)
   end
