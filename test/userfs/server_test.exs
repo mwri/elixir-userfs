@@ -13,6 +13,7 @@ defmodule Userfs.ServerTest do
           ]}
       ]) do
         {:ok, pid} = Userfs.mount("/tmp/testfs", TestFs, this: 2, that: 3)
+        Process.sleep(50)
         pid
       end
       on_exit fn ->
