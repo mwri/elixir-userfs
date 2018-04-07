@@ -62,6 +62,7 @@ defmodule Userfs.Server do
       fs_state:    fs_state,
       port:        port
     }
+    Process.sleep(50)
     {:ok, state}
   end
 
@@ -164,14 +165,6 @@ defmodule Userfs.Server do
   end
 
   def handle_info(
-    {port, {:data, <<@magiccookie::size(32), @status_data::size(32), port_os_pid::size(32)>>}},
-    %__MODULE__{phase: :stopping, port: port} = state
-  ) do
-    server_stop_port(%{state | port_os_pid: port_os_pid})
-    {:noreply, %{state | port_os_pid: nil}}
-  end
-
-  def handle_info(
     {port, {:exit_status, 0}},
     %__MODULE__{port: port} = state
   ) do
@@ -189,34 +182,32 @@ defmodule Userfs.Server do
     {port, {:data, <<@magiccookie::size(32), data::binary>>}},
     %__MODULE__{port: port, port_os_pid: port_os_pid} = state
   ) do
-    log_error("ignoring port (PID #{port_os_pid}) unrecognised data #{data} to userfs #{:erlang.pid_to_list(self())}")
+    log_error("ignoring port (PID #{port_os_pid}) unrecognised data #{inspect(data)} to userfs #{:erlang.pid_to_list(self())}")
     {:noreply, state}
   end
 
-  def handle_info({port, {:data, data}}, %__MODULE__{port: port, port_os_pid: port_os_pid} = state) do
-    log_error("port (PID #{port_os_pid}) data #{data} to userfs #{:erlang.pid_to_list(self())} received without correct cookie")
-    server_stop_port(state)
+  def handle_info({_port, {:data, data}}, %__MODULE__{port: port, port_os_pid: port_os_pid} = state) do
+    log_error("port (PID #{port_os_pid}) data #{inspect(data)} to userfs #{:erlang.pid_to_list(self())} received without correct cookie")
+    {_method, state} = server_stop_port(state)
     {:noreply, server_slow_stop(state, {:error, "communication with port fatally compromised (bad cookie)"})}
   end
 
-  def handle_info({:stop, {reason, client}}, %__MODULE__{phase: :stopping} = state) do
+  def handle_info({:slow_stop, {reason, {:genserver_client, client}}}, %__MODULE__{phase: :stopping} = state) do
     GenServer.reply(client, :ok)
     {:stop, reason, state}
   end
-
-  def handle_info({:stop, reason}, %__MODULE__{phase: :stopping} = state) do
+  def handle_info({:slow_stop, reason}, %__MODULE__{phase: :stopping} = state) do
     {:stop, reason, state}
   end
 
   def handle_call(:stop, from, %__MODULE__{phase: :ready} = state) do
     case server_stop_port(state) do
-      :unmounted ->
+      {:unmounted, state} ->
         {:reply, :ok, server_slow_stop(state, :normal)}
-      :killed ->
-        {:noreply, server_slow_stop(state, {:normal, from})}
+      {:killed, state} ->
+        {:noreply, server_slow_stop(state, {:normal, {:genserver_client, from}})}
     end
   end
-
   def handle_call(:stop, from, %__MODULE__{phase: :init} = state) do
     {:noreply, server_slow_stop(state, {:normal, from})}
   end
@@ -231,15 +222,15 @@ defmodule Userfs.Server do
     {:reply, {:ok, status}, state}
   end
 
-  defp server_stop_port(%__MODULE__{mount_point: mount_point, port_os_pid: port_os_pid}) do
+  defp server_stop_port(%__MODULE__{mount_point: mount_point, port_os_pid: port_os_pid} = state) do
     case System.cmd("umount", [mount_point], stderr_to_stdout: true) do
       {_out, 0} ->
-        :unmounted
+        {:unmounted, %{state | port_os_pid: nil}}
       {_out, _err} ->
         Process.sleep(50)
         System.cmd("kill", ["#{port_os_pid}"], stderr_to_stdout: true)
         Process.sleep(50)
-        :killed
+        {:killed, %{state | port_os_pid: nil}}
     end
   end
 
@@ -247,7 +238,7 @@ defmodule Userfs.Server do
     state
   end
   defp server_slow_stop(state, info) do
-    Process.send_after(self(), {:stop, info}, 100 )
+    Process.send_after(self(), {:slow_stop, info}, 100, [])
     %{state | phase: :stopping}
   end
 
