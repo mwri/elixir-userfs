@@ -7,7 +7,8 @@ script:
   - mix deps.get
   - mix compile
   - mix dialyzer --halt-exit-status
-  - mix coveralls.travis
+  - mix coveralls --only examplefs
+  - mix coveralls.travis --exclude examplefs
 install: true
 elixir:
   - 1.6.4
