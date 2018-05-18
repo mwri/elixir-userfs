@@ -9,7 +9,7 @@ defmodule Userfs.ServerTest do
     setup do
       System.cmd("mkdir", ["-p", "/tmp/testfs"])
       pid = with_mocks([
-        {TestFs, [], [
+        {TestFs, [:passthrough], [
             userfs_init: fn(_mp, _opts) -> {:ok, :mock_state} end,
           ]}
       ]) do

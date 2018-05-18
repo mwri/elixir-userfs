@@ -16,7 +16,7 @@ defmodule UserfsTest do
 
     test "returns PID of FS" do
       with_mocks([
-        {TestFs, [], [
+        {TestFs, [:passthrough], [
             userfs_init: fn(_mp, _opts) -> {:ok, :mock_state} end,
           ]}
       ]) do
@@ -27,8 +27,8 @@ defmodule UserfsTest do
 
     test "FS init is called" do
       with_mocks([
-        {TestFs, [], [
-            userfs_init: fn(_mp, _opts) -> {:ok, nil} end,
+        {TestFs, [:passthrough], [
+            userfs_init: fn(_mp, _opts) -> {:ok, :mock_state} end,
           ]}
       ]) do
         Userfs.mount("/tmp/testfs", TestFs, this: 2, that: 3)
@@ -49,7 +49,7 @@ defmodule UserfsTest do
 
     test "returns successful unmount for mounted FS" do
       with_mocks([
-        {TestFs, [], [
+        {TestFs, [:passthrough], [
             userfs_init: fn(_mp, _opts) -> {:ok, :mock_state} end,
           ]}
       ]) do
@@ -77,7 +77,7 @@ defmodule UserfsTest do
 
     test "returns a list of mounted filesystems" do
       with_mocks([
-        {TestFs, [], [
+        {TestFs, [:passthrough], [
             userfs_init: fn(_mp, _opts) -> {:ok, :mock_state} end,
           ]}
       ]) do
@@ -96,7 +96,7 @@ defmodule UserfsTest do
     setup do
       System.cmd("mkdir", ["-p", "/tmp/testfs"])
       with_mocks([
-        {TestFs, [], [
+        {TestFs, [:passthrough], [
             userfs_init: fn(_mp, _opts) -> {:ok, :mock_state} end,
           ]}
       ]) do
@@ -111,7 +111,7 @@ defmodule UserfsTest do
     test "FS implementation represented to OS (files returned)" do
       mock_files = ["aaa", "bbb"]
       with_mocks([
-        {TestFs, [], [
+        {TestFs, [:passthrough], [
             userfs_getattr: fn(:mock_state, "/") -> {:ok, {0o0755, @attr_dir, 0}, :mock_state} end,
             userfs_readdir: fn(:mock_state, "/") -> {:ok, mock_files, :mock_state} end,
           ]}
@@ -129,7 +129,7 @@ defmodule UserfsTest do
     setup do
       System.cmd("mkdir", ["-p", "/tmp/testfs"])
       with_mocks([
-        {TestFs, [], [
+        {TestFs, [:passthrough], [
             userfs_init: fn(_mp, _opts) -> {:ok, :mock_state} end,
           ]}
       ]) do
@@ -143,7 +143,7 @@ defmodule UserfsTest do
 
     test "FS implementation represented to OS (file)" do
       with_mocks([
-        {TestFs, [], [
+        {TestFs, [:passthrough], [
             userfs_getattr: fn(:mock_state, "/f") -> {:ok, {0o0644, @attr_file, 10}, :mock_state} end,
           ]}
       ]) do
@@ -157,7 +157,7 @@ defmodule UserfsTest do
 
     test "FS implementation represented to OS (directory)" do
       with_mocks([
-        {TestFs, [], [
+        {TestFs, [:passthrough], [
             userfs_getattr: fn(:mock_state, "/d") -> {:ok, {0o0755, @attr_dir, 0}, :mock_state} end,
           ]}
       ]) do
@@ -170,7 +170,7 @@ defmodule UserfsTest do
 
     test "FS implementation represented to OS (symlink)" do
       with_mocks([
-        {TestFs, [], [
+        {TestFs, [:passthrough], [
             userfs_getattr: fn(:mock_state, "/s") -> {:ok, {0o0555, @attr_symlink, 20}, :mock_state} end,
           ]}
       ]) do
@@ -184,7 +184,7 @@ defmodule UserfsTest do
 
     test "FS implementation represented to OS (noent error)" do
       with_mocks([
-        {TestFs, [], [
+        {TestFs, [:passthrough], [
             userfs_getattr: fn(:mock_state, "/e") -> {:error, @error_noent, :mock_state} end,
           ]}
       ]) do
@@ -200,7 +200,7 @@ defmodule UserfsTest do
     setup do
       System.cmd("mkdir", ["-p", "/tmp/testfs"])
       with_mocks([
-        {TestFs, [], [
+        {TestFs, [:passthrough], [
             userfs_init: fn(_mp, _opts) -> {:ok, :mock_state} end,
           ]}
       ]) do
@@ -215,7 +215,7 @@ defmodule UserfsTest do
     test "FS implementation represented to OS" do
       mock_content = "abcdefghijklmnopqrstuvwxyz0123456789"
       with_mocks([
-        {TestFs, [], [
+        {TestFs, [:passthrough], [
             userfs_getattr: fn(:mock_state, "/f") -> {:ok, {0o0644, @attr_file, byte_size(mock_content)}, :mock_state} end,
             userfs_read: fn(:mock_state, "/f") -> {:ok, mock_content, :mock_state} end,
           ]}
@@ -232,7 +232,7 @@ defmodule UserfsTest do
     setup do
       System.cmd("mkdir", ["-p", "/tmp/testfs"])
       with_mocks([
-        {TestFs, [], [
+        {TestFs, [:passthrough], [
             userfs_init: fn(_mp, _opts) -> {:ok, :mock_state} end,
           ]}
       ]) do
@@ -247,7 +247,7 @@ defmodule UserfsTest do
     test "FS implementation represented to OS" do
       mock_linkcontent = "/tmp/testfs/f"
       with_mocks([
-        {TestFs, [], [
+        {TestFs, [:passthrough], [
             userfs_getattr: fn(:mock_state, "/s") -> {:ok, {0o0644, @attr_symlink, byte_size(mock_linkcontent)}, :mock_state} end,
             userfs_readlink: fn(:mock_state, "/s") -> {:ok, mock_linkcontent, :mock_state} end,
           ]}

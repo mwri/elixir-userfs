@@ -186,7 +186,7 @@ defmodule Userfs.Server do
     {:noreply, state}
   end
 
-  def handle_info({_port, {:data, data}}, %__MODULE__{port: port, port_os_pid: port_os_pid} = state) do
+  def handle_info({port, {:data, data}}, %__MODULE__{port: port, port_os_pid: port_os_pid} = state) do
     log_error("port (PID #{port_os_pid}) data #{inspect(data)} to userfs #{:erlang.pid_to_list(self())} received without correct cookie")
     {_method, state} = server_stop_port(state)
     {:noreply, server_slow_stop(state, {:error, "communication with port fatally compromised (bad cookie)"})}
