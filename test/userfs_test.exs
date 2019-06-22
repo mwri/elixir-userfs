@@ -7,10 +7,12 @@ defmodule UserfsTest do
   describe "mount" do
 
     setup do
-      System.cmd("mkdir", ["-p", "/tmp/testfs"])
+      # {_output, 0} =
+      System.cmd("mkdir", ["/tmp/testfs"], [stderr_to_stdout: true])
       on_exit fn ->
         Userfs.umount("/tmp/testfs")
-        System.cmd("rmdir", ["/tmp/testfs"])
+        # {_output, 0} =
+        System.cmd("rmdir", ["/tmp/testfs"], [stderr_to_stdout: true])
       end
     end
 
