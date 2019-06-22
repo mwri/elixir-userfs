@@ -200,16 +200,16 @@ defmodule Userfs.Server do
     {:stop, reason, state}
   end
 
-  def handle_call(:stop, from, %__MODULE__{phase: :ready} = state) do
+  def handle_call(:stop, from, %__MODULE__{phase: :init} = state) do
+    {:noreply, server_slow_stop(state, {:normal, from})}
+  end
+  def handle_call(:stop, from, %__MODULE__{} = state) do
     case server_stop_port(state) do
       {:unmounted, state} ->
         {:reply, :ok, server_slow_stop(state, :normal)}
       {:killed, state} ->
         {:noreply, server_slow_stop(state, {:normal, {:genserver_client, from}})}
     end
-  end
-  def handle_call(:stop, from, %__MODULE__{phase: :init} = state) do
-    {:noreply, server_slow_stop(state, {:normal, from})}
   end
 
   def handle_call(:status, _from, %__MODULE__{port_os_pid: port_os_pid} = state) do
