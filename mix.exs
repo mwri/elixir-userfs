@@ -27,9 +27,9 @@ defmodule Userfs.MixProject do
     [
       {:efuse, "~> 1.0.2"},
       {:dialyxir, "~> 0.5.0", only: [:dev, :test], runtime: false},
-      {:ex_doc, ">= 0.0.0", only: [:dev], runtime: false},
-      {:excoveralls, "~> 0.8", only: [:test], runtime: false},
-      {:mock, "~> 0.3.0", only: [:test], runtime: false},
+      {:ex_doc, ">= 0.20.2", only: [:dev], runtime: false},
+      {:excoveralls, "~> 0.11.1", only: [:test], runtime: false},
+      {:mock, "~> 0.3.3", only: [:test], runtime: false},
     ]
   end
 
